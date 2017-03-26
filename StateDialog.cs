@@ -16,6 +16,7 @@ namespace CustomStateBot
     {
         private const string HELP_MESSAGE =
             "\n " + "* To receive a new quote, type 'quote'. \n "
+            + "\n " + "* To see this menu again, type 'help'. \n "
             + "* To find out more about the app, type 'about' \n ";
 
         private bool userWelcomed;
@@ -72,8 +73,11 @@ namespace CustomStateBot
                 quoteId = quoteId >= elems.Count ? 0 : quoteId + 1;
                 context.UserData.SetValue(string.Format(ContextConstants.USER_QUOTE_KEY, message.From.Name, "Hillary_Clinton"), quoteId);
             }
+            else if (message.Text.Equals("help", StringComparison.InvariantCultureIgnoreCase)) {
+                await context.PostAsync($"List of commands: {HELP_MESSAGE}");
+            }
             else if (message.Text.Equals("about", StringComparison.InvariantCultureIgnoreCase)) {
-                await context.PostAsync("For Jules, my favorite Hillary fan <3 :).  \n\n ©2017 | CodingCreation LLC");
+                await context.PostAsync("For Jules, my favorite Hillary fan :)  \n\n ©2017 | CodingCreation LLC");
             }
 
             context.Wait(MessageReceivedAsync);
