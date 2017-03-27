@@ -6,8 +6,16 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Xml.Linq;
 
+using LanguageExt;
+using LanguageExt.SomeHelp;
+using LanguageExt.Trans;
+
+using static LanguageExt.Prelude;
+using LanguageExt.UnitsOfMeasure;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
+
+using static System.StringComparison;
 
 namespace CustomStateBot
 {
@@ -53,7 +61,7 @@ namespace CustomStateBot
                 return;
             }
 
-            if (message.Text.Equals("quote", StringComparison.InvariantCultureIgnoreCase)) {
+            if (message.Text.Equals("quote", InvariantCultureIgnoreCase)) {
                 XElement xmlTree;
 
                 using (
@@ -62,8 +70,11 @@ namespace CustomStateBot
                     string fileText = await reader.ReadToEndAsync();
                     xmlTree = XElement.Parse(fileText);
                 }
-                List<XElement> elems = xmlTree.FirstNode.ElementsAfterSelf().ToList();
-                
+                Lst<XElement> elems = match(
+                    Optional(xmlTree.FirstNode.ElementsAfterSelf()),
+                    Some: toList, 
+                    None: List<XElement>);
+
                 string quote = elems[quoteId].Value;
                 string refStr = elems[quoteId].Attribute(XName.Get("ref")).Value.Replace(". ", ".  \n  \n");
                 string author = elems[quoteId].Attribute(XName.Get("author")).Value;
@@ -73,11 +84,11 @@ namespace CustomStateBot
                 quoteId = quoteId >= elems.Count ? 0 : quoteId + 1;
                 context.UserData.SetValue(string.Format(ContextConstants.USER_QUOTE_KEY, message.From.Name, "Hillary_Clinton"), quoteId);
             }
-            else if (message.Text.Equals("help", StringComparison.InvariantCultureIgnoreCase)) {
+            else if (message.Text.Equals("help", InvariantCultureIgnoreCase)) {
                 await context.PostAsync($"List of commands: {HELP_MESSAGE}");
             }
-            else if (message.Text.Equals("about", StringComparison.InvariantCultureIgnoreCase)) {
-                await context.PostAsync("For Jules, my favorite Hillary fan :)  \n\n ©2017 | CodingCreation LLC");
+            else if (message.Text.Equals("about", InvariantCultureIgnoreCase)) {
+                await context.PostAsync("For Jules, the biggest Hillary fan I know :)  \n\n ©2017 | CodingCreation LLC");
             }
 
             context.Wait(MessageReceivedAsync);
